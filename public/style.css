@@ -1,9 +1,15 @@
+.tooltip-inner {
+   white-space:pre-wrap;
+   text-align:left;  
+}
+
+
 /* styles */
 /* called by your view template */
 
 /* You might want to try something fancier: */
 /* less: http://lesscss.org/ */
-
+/*
 * {
   box-sizing: border-box;
 }
@@ -76,3 +82,4 @@ footer {
 footer > a {
   color: #BBBBBB;
 }
+*/
