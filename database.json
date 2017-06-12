@@ -1,0 +1,18 @@
+[
+  {
+    "id": 1,
+    "owner": "kalle",
+    "date": "2017-01-01"
+  },
+  {
+    "id": 2,
+    "owner": "pelle2255",
+    "date": "2017-02-01"
+  },
+  {
+    "id": 3,
+    "date": "2017-04-01",
+    "owner": "daniel",
+    "changeLog": []
+  }
+]
