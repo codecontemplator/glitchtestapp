@@ -22,7 +22,7 @@ function storeBooking(booking) {
   $.ajax({
     url: "/bookings/" + booking.id,
     type: "PUT",
-    data: JSON.stringify({ id:booking.id, owner:booking.owner, date: booking.date }),
+    data: JSON.stringify({ id:booking.id, owner:booking.owner, date: booking.date, changeLog: booking.changeLog }),
     contentType: 'application/json',
     success: function() {
       console.log("Stored!")
@@ -31,6 +31,30 @@ function storeBooking(booking) {
       console.log("Error " + JSON.stringify(e))
     }  
   });
+}
+
+class BookingHistory extends Component {
+
+  constructor(props) {
+    super(props);
+    
+    this.state = {
+      detailsVisible: false
+    }
+  }
+
+  render({changeLog}) {
+    var result = null;
+    if (changeLog && changeLog.length > 0) {
+      result = h('span', {
+        className:'glyphicon glyphicon-list',
+        'data-toggle':'tooltip',
+        'data-placement':'right',
+        title: changeLog.map(({ timestamp, owner }) => timestamp.substring(0,16) + " " + owner).join('</br>')
+      })
+    }
+    return result; 
+  }
 }
 
 class BookingsRow extends Component {
@@ -44,7 +68,7 @@ class BookingsRow extends Component {
   
   render({booking, handleClick, handleMouseOver, handleKeyUp, handleChange}, state) {
     return h('tr', {onMouseOver: () => handleMouseOver(booking)}, [
-            h('td', { width:'20px'}, [
+            h('td', { width:'30px'}, [
               booking.selected ? 
                 h('a', {
                   href:'#',
@@ -52,11 +76,12 @@ class BookingsRow extends Component {
                 }, [h('span', { className:'glyphicon glyphicon-edit' }, null)])                
                 : null
               ]),
-            h('td', null, booking.date),
-            h('td', null, 
+            h('td', { width:'120px'}, booking.date),
+            h('td', { width:'300px'}, 
               h('div', {}, [
                 !booking.editable ? state.owner : 
                   h('input', { 
+                    style: { width:'100%', padding:'2px' },
                     type:'text', 
                     value:state.owner,
                     onkeyup: (e) => { this.setState({ owner: e.target.value}); handleKeyUp(e, booking) },
@@ -65,7 +90,7 @@ class BookingsRow extends Component {
                 
               ])
             ),
-            h('td', null, booking.changeLog)
+            h('td', {width:'200px'}, [h(BookingHistory, { changeLog:booking.changeLog })])
           ]    
         );    
   }
@@ -80,7 +105,7 @@ const BookingsTable = ({bookings, handleClick, handleMouseOver, handleKeyUp, han
             h('th', null, " "),
             h('th', null, "date"),
             h('th', null, "owner"),
-            h('th', null, "changelog")
+            h('th', null, "history")
           ])
         ]),
         h('tbody', null, 
@@ -162,11 +187,26 @@ class App extends Component {
   
   handleBookingChanged(e,argBooking) {
       console.log("handle change " + e.target.value)
+      
+      const addEntryToChangeLog = function(b) {
+        const entry = {timestamp:new Date().toLocaleString(), owner:b.owner};
+        if (b.changeLog) {
+          return b.changeLog.concat([entry]);
+        }
+        else {
+          return [entry]
+        }
+      }
+      
       this.updateBookings(
         argBooking.id,
-        (b) => ({ owner: e.target.value })
+        (b) => ({ owner: e.target.value, changeLog: addEntryToChangeLog(b) })
       );    
       storeBooking(argBooking);
+  }
+  
+  componentDidUpdate() {
+    $('[data-toggle="tooltip"]').tooltip({ html: true }); 
   }
   
   render(props, state) {

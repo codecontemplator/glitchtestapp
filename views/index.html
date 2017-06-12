@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>Welcome to Glitch app - bookings</title>
+  <title>Online bookings</title>
   <meta name="description" content="A bookings thing made with Glitch">
   <link id="favicon" rel="icon" href="https://glitch.com/edit/favicon-app.ico" type="image/x-icon">
   <meta charset="utf-8">
@@ -9,14 +9,20 @@
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/preact/7.2.0/preact.dev.js"></script>  
+  <script src="//cdnjs.cloudflare.com/ajax/libs/preact/7.2.0/preact.dev.js"></script>  
 </head>
 <body>
 
   <header>
-    <h1>
-      Bookings
-    </h1>
+    <div class="jumbotron" style="margin:20px;padding:20px">
+      <h1>
+        Bookings
+      </h1>
+      <p>
+        Use this page to sign up for a specific date. Just click edit and enter your name on
+        a free slot.
+      </p>
+    </div>
   </header>
   
   <main>
@@ -25,6 +31,14 @@
 
   <footer>
     <script src="/client.js"></script>
+  <link rel="stylesheet" href="/style.css">
+    <!--
+    <script>
+      $(document).ready(function(){
+          $('[data-toggle="tooltip"]').tooltip(); 
+      });
+    </script>
+    -->
   </footer>
 </body>
 </html>
