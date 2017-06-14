@@ -33,17 +33,7 @@ function storeBooking(booking) {
   });
 }
 
-class BookingHistory extends Component {
-
-  constructor(props) {
-    super(props);
-    
-    this.state = {
-      detailsVisible: false
-    }
-  }
-
-  render({changeLog}) {
+const BookingHistory = ({changeLog}) => {
     var result = null;
     if (changeLog && changeLog.length > 0) {
       result = h('span', {
@@ -55,7 +45,6 @@ class BookingHistory extends Component {
     }
     return result; 
   }
-}
 
 class BookingsRow extends Component {
   constructor(props) {
@@ -104,7 +93,7 @@ const BookingsTable = ({bookings, handleClick, handleMouseOver, handleKeyUp, han
           h('tr', null, [
             h('th', null, " "),
             h('th', null, "date"),
-            h('th', null, "owner"),
+            h('th', null, "name"),
             h('th', null, "history")
           ])
         ]),
