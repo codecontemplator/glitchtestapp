@@ -22,9 +22,7 @@ app.use(session({
 }));
 
 app.use(function(req, res, next) {
-  console.log("middleware");
   if (req.session && req.session.role) {
-      console.log("middleware 2 " + req.session.role + " : " + JSON.stringify(req.url));
       res.locals.role = req.session.role;
       next();
   } else {
@@ -50,10 +48,14 @@ app.get("/", requireLogin, function (request, response) {
   response.sendFile(__dirname + '/views/index.html');
 });
 
+app.get("/userinfo", function(request, response) {
+  response.setHeader('Content-Type', 'application/json');
+  response.send(JSON.stringify({ role: request.session.role }));
+});
+
 //var database = require("./database.json"); 
 function getDatabaseContent() {
   const text = fs.readFileSync('./database.json','utf8');
-  console.log(text);
   return JSON.parse(text);
 }
 
@@ -67,7 +69,6 @@ app.get("/login", function (request, response) {
 });
 
 app.post('/login', function(req, res) {
-  console.log("/login post " + JSON.stringify(req.body) + " : " + JSON.stringify(req.params) + " : " + JSON.stringify(req.query))
   if (req.body.secret) {
     if (req.body.secret == process.env.USER_SECRET) {
         req.session.role = "user";
@@ -85,7 +86,6 @@ app.get('/logout', function(req, res) {
 });
 
 app.get("/bookings", function (request, response) {
-
   response.send(getDatabaseContent())
 });
 
