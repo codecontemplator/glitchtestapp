@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Online bookings</title>
+  <meta name="description" content="A bookings thing made with Glitch">
+  <link id="favicon" rel="icon" href="https://glitch.com/edit/favicon-app.ico" type="image/x-icon">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/preact/7.2.0/preact.dev.js"></script>  
+</head>
+<body>
+
+  <header>
+    <div class="jumbotron" style="margin:20px;padding:20px">
+      <h1>
+        Bookings
+      </h1>
+      <p>
+        Please enter the secret keyword
+      </p>
+    </div>
+  </header>
+  
+  <main>
+    <!--<div id="root" class="container"></div>-->
+    <div class="panel panel-default" style="padding:20px;margin:20px">
+      <form action="/login" method="POST">
+         <div class="form-group" >
+            <input type="text" id="secret" name="secret" value="1234" class="form-control" style="max-width:80%;display:block;margin-left:auto;margin-right:auto;text-align:center">
+          </div>        
+          <input type="submit" value="Submit" class="btn" style="display:block;margin-left:auto;margin-right:auto">
+      </form> 
+    </div>
+  </main>
+
+  <footer>
+<!--    <script src="/client.js"></script>-->
+  <link rel="stylesheet" href="/style.css">
+  </footer>
+</body>
+</html>

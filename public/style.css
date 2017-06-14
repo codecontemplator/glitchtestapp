@@ -1,8 +1,8 @@
 .tooltip-inner {
    white-space:pre-wrap;
-   text-align:left;  
+   text-align:left;    
+    max-width: 350px;
 }
-
 
 /* styles */
 /* called by your view template */

@@ -12,7 +12,8 @@
   },
   "dependencies": {
     "express": "^4.15.2",
-    "body-parser": "latest"
+    "body-parser": "latest",
+    "client-sessions": "latest"
   },
   "engines": {
     "node": "6.10.x"
