@@ -1,3 +1,5 @@
+'use strict';
+
 // client-side js
 // run by the browser each time your view template is loaded
 
@@ -9,13 +11,17 @@
 const {Component, render, h} = window.preact;
 
 function fetchBookings() {
-  return fetch('/bookings').then(res => {
-    if (res.ok) {
-      return res.json(); 
-    } else {
-      throw "failed to load bookings";
-    }
-  });
+  return  $.ajax({
+      url: "/bookings",
+      dataType: "json",
+  });    
+}
+
+function fetchUserInfo() {
+  return  $.ajax({
+      url: "/userinfo",
+      dataType: "json",
+  });  
 }
 
 function storeBooking(booking) {
@@ -213,9 +219,12 @@ class App extends Component {
 
 // Entry point for application
 (function start() {
-   fetchBookings().then(     
-     bookings =>
-       render(h(App, { bookings }), document.getElementById('root'))
+  Promise.all([fetchUserInfo(),fetchBookings()]).then(
+    ([userInfo,bookings]) => {
+       console.log("ui="+JSON.stringify(userInfo));      
+      console.log("bookings="+JSON.stringify(bookings));
+       return render(h(App, { bookings, userInfo }), document.getElementById('root'));
+    }
    )
    ;
 }());
