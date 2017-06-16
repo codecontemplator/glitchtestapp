@@ -205,15 +205,14 @@ class App extends Component {
   }
   
   render(props, state) {
-    return h('div', {className: 'app'}, [
-      h(BookingsTable, { 
-        bookings: state.bookingsX, 
-        handleClick: this.handleBookingClicked, 
-        handleMouseOver:this.handleMouseOverBooking,
-        handleKeyUp:this.handleKeyUpBooking,
-        handleChange:this.handleBookingChanged
-      })
-    ]);
+    return <div class="app">
+              <BookingsTable 
+                bookings={state.bookingsX} 
+                handleClick={this.handleBookingClicked}
+                handleMouseOver={this.handleMouseOverBooking}
+                handleKeyUp={this.handleKeyUpBooking}
+                handleChange={this.handleBookingChanged} />
+           </div>
   }  
 }
 

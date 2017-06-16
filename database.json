@@ -1,7 +1,7 @@
 [
   {
     "id": 1,
-    "owner": "kalledasdfjsdldasdksjfhsd",
+    "owner": "kalledasdfjsdldasdksjfhdasdsd",
     "date": "2017-01-01",
     "changeLog": [
       {
@@ -27,6 +27,10 @@
       {
         "timestamp": "2017-06-13 00:18:31",
         "owner": "kalledasdfjsdldas"
+      },
+      {
+        "timestamp": "2017-06-16 18:32:24",
+        "owner": "kalledasdfjsdldasdksjfhsd"
       }
     ]
   },
