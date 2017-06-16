@@ -31,15 +31,12 @@
   </main>
 
   <footer>
-    <script src="/client.js"></script>
+     <script src="https://cdnjs.cloudflare.com/ajax/libs/systemjs/0.19.31/system.js"></script>
+    <!--<script src="/client.js"></script>-->
   <link rel="stylesheet" href="/style.css">
-    <!--
-    <script>
-      $(document).ready(function(){
-          $('[data-toggle="tooltip"]').tooltip(); 
-      });
-    </script>
-    -->
+  <script>
+    SystemJS.import('/client.js');
+  </script>
   </footer>
 </body>
 </html>

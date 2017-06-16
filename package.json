@@ -13,10 +13,25 @@
   "dependencies": {
     "express": "^4.15.2",
     "body-parser": "latest",
-    "client-sessions": "latest"
+    "client-sessions": "latest",
+		"babel-core": "*",
+		"babel-cli": "*",
+		"babel-preset-es2015": "*",
+		"babel-plugin-transform-es2015-modules-systemjs": "*",
+    "babel-plugin-transform-react-jsx": "*"
   },
   "engines": {
     "node": "6.10.x"
+  },
+  "babel": {
+    "presets": [
+			"es2015"
+		],
+    "plugins": [
+        ["transform-react-jsx", {
+          "pragma": "h"
+        }]
+      ]    
   },
   "repository": {
     "url": "https://glitch.com/edit/#!/welcome-project"

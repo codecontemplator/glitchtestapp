@@ -6,7 +6,13 @@ var express = require('express');
 var bodyParser = require('body-parser')
 var fs = require('fs');
 var session = require('client-sessions');
+
+var { File, transformFile } = require('babel-core');
 var app = express();
+
+const babel_opts = JSON.parse(fs.readFileSync('package.json')).babel;
+
+//babel_opts.plugins = ['babel-plugin-transform-es2015-modules-systemjs'];
 
 // we've started you off with Express, 
 // but feel free to use whatever libs or frameworks you'd like through `package.json`.
@@ -16,8 +22,8 @@ app.use(session({
   secret: process.env.SESSION_SECRET,
   duration: 30 * 60 * 1000,
   activeDuration: 5 * 60 * 1000,
-  //httpOnly: true,
-  //secure: true,
+  httpOnly: true,
+  secure: true,
   ephemeral: true  
 }));
 
@@ -38,6 +44,22 @@ function requireLogin (req, res, next) {
   }
 };
 
+app.get(/.*\.js$/, (req, res, next) => {
+  const path = `public${req.path}`;
+  
+  if (req.query['original'] !== undefined) {
+    return fs.readFile(path, next);
+  }
+  
+  transformFile(path, babel_opts, (err, result) => {
+    if (err) {
+      return next(err);
+    }
+    
+    res.end(result.code);
+  });
+});
+
 // http://expressjs.com/en/starter/static-files.html
 app.use(express.static('public'));
 app.use(bodyParser.urlencoded({ extended: true }))
@@ -47,6 +69,7 @@ app.use(bodyParser.json());
 app.get("/", requireLogin, function (request, response) {
   response.sendFile(__dirname + '/views/index.html');
 });
+
 
 app.get("/userinfo", function(request, response) {
   response.setHeader('Content-Type', 'application/json');
