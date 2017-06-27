@@ -14,6 +14,7 @@
     "express": "^4.15.2",
     "body-parser": "latest",
     "client-sessions": "latest",
+    "nosql": "latest",
 		"babel-core": "*",
 		"babel-cli": "*",
 		"babel-preset-es2015": "*",

@@ -6,6 +6,14 @@ var express = require('express');
 var bodyParser = require('body-parser')
 var fs = require('fs');
 var session = require('client-sessions');
+var nosql = require('nosql');
+var db = nosql.load('./database.nosql');
+
+db.find().make(function(filter) {
+    filter.callback(function(err, response) {
+        console.log("Database content at startup: " + JSON.stringify(response));
+    });
+})
 
 var { File, transformFile } = require('babel-core');
 var app = express();
@@ -108,18 +116,33 @@ app.get('/logout', function(req, res) {
   res.redirect('/');
 });
 
-app.get("/bookings", function (request, response) {
-  response.send(getDatabaseContent())
+app.get("/list/:id/items", requireLogin, function (request, response) {
+  const listId = request.params.id;
+  const databaseQuery = new Promise((resolve, reject) => {
+    db.find().make(function(filter) {
+        filter.where('listId', '=', listId);
+        filter.callback(function(err, resultset) {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(resultset);
+            }
+        });
+    })    
+  });
+  
+  databaseQuery.then(data => response.send(data));
 });
 
-app.put("/bookings/:id", function(request, response) {
-  var id = request.params.id;
-  var database = getDatabaseContent();
-  database[id-1] = request.body;
-  setDatabaseContent(database);
-  response.sendStatus(200);
+app.put("/list/:id/items/:itemId", function(request,response,next) {
+  const listId = request.params.id;
+  const itemId = request.params.itemId;
+  var itemData = request.body;
+  itemData.id = itemId;
+  itemData.listId = listId;
+  db.update(itemData).where('id', itemId);
+  response.sendStatus(200);  // not sure if the update is completed here?
 });
-
 
 // listen for requests :)
 var listener = app.listen(process.env.PORT, function () {

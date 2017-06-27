@@ -12,7 +12,7 @@ const {Component, render, h} = window.preact;
 
 function fetchBookings() {
   return  $.ajax({
-      url: "/bookings",
+      url: "/list/2017/items",
       dataType: "json",
   });    
 }
@@ -26,9 +26,9 @@ function fetchUserInfo() {
 
 function storeBooking(booking) {
   $.ajax({
-    url: "/bookings/" + booking.id,
+    url: "/list/2017/items/" + booking.id,
     type: "PUT",
-    data: JSON.stringify({ id:booking.id, owner:booking.owner, date: booking.date, changeLog: booking.changeLog }),
+    data: JSON.stringify({ owner:booking.owner, date: booking.date, changeLog: booking.changeLog }),
     contentType: 'application/json',
     success: function() {
       console.log("Stored!")
