@@ -10,9 +10,9 @@
 
 const {Component, render, h} = window.preact;
 
-function fetchBookings() {
+function fetchListItems(listId = "2017") {
   return  $.ajax({
-      url: "/list/2017/items",
+      url: "/list/" + listId + "/items",
       dataType: "json",
   });    
 }
@@ -24,11 +24,11 @@ function fetchUserInfo() {
   });  
 }
 
-function storeBooking(booking) {
+function storeListItem(item, listId = "2017") {
   $.ajax({
-    url: "/list/2017/items/" + booking.id,
+    url: "/list/" + listId + "/items/" + item.id,
     type: "PUT",
-    data: JSON.stringify({ owner:booking.owner, date: booking.date, changeLog: booking.changeLog }),
+    data: JSON.stringify({ owner:item.owner, date: item.date, changeLog: item.changeLog }),
     contentType: 'application/json',
     success: function() {
       console.log("Stored!")
@@ -39,7 +39,7 @@ function storeBooking(booking) {
   });
 }
 
-const BookingHistory = ({changeLog}) => {
+const ListItemHistory = ({changeLog}) => {
     var result = null;
     if (changeLog && changeLog.length > 0) {
       result = h('span', {
@@ -52,46 +52,46 @@ const BookingHistory = ({changeLog}) => {
     return result; 
   }
 
-class BookingsRow extends Component {
+class ListItemRow extends Component {
   constructor(props) {
     super(props);    
     
     this.state = {
-       owner: this.props.booking.owner         
+       owner: this.props.listItem.owner         
     };     
   }
   
-  render({booking, handleClick, handleMouseOver, handleKeyUp, handleChange}, state) {
-    return h('tr', {onMouseOver: () => handleMouseOver(booking)}, [
+  render({listItem, handleClick, handleMouseOver, handleKeyUp, handleChange}, state) {
+    return h('tr', {onMouseOver: () => handleMouseOver(listItem)}, [
             h('td', { width:'30px'}, [
-              booking.selected ? 
+              listItem.selected ? 
                 h('a', {
                   href:'#',
-                  onClick: () => handleClick(booking)
+                  onClick: () => handleClick(listItem)
                 }, [h('span', { className:'glyphicon glyphicon-edit' }, null)])                
                 : null
               ]),
-            h('td', { width:'120px'}, booking.date),
+            h('td', { width:'120px'}, listItem.date),
             h('td', { width:'300px'}, 
               h('div', {}, [
-                !booking.editable ? state.owner : 
+                !listItem.editable ? state.owner : 
                   h('input', { 
                     style: { width:'100%', padding:'2px' },
                     type:'text', 
                     value:state.owner,
-                    onkeyup: (e) => { this.setState({ owner: e.target.value}); handleKeyUp(e, booking) },
-                    onchange: (e) => handleChange(e, booking),
+                    onkeyup: (e) => { this.setState({ owner: e.target.value}); handleKeyUp(e, listItem) },
+                    onchange: (e) => handleChange(e, listItem),
                   }, []),
                 
               ])
             ),
-            h('td', {width:'200px'}, [h(BookingHistory, { changeLog:booking.changeLog })])
+            h('td', {width:'200px'}, [h(ListItemHistory, { changeLog:listItem.changeLog })])
           ]    
         );    
   }
 }
 
-const BookingsTable = ({bookings, handleClick, handleMouseOver, handleKeyUp, handleChange }) => 
+const ListItemsTable = ({listItems, handleClick, handleMouseOver, handleKeyUp, handleChange }) => 
     h('table', 
       { className: 'table table-striped'}, 
       [
@@ -104,7 +104,7 @@ const BookingsTable = ({bookings, handleClick, handleMouseOver, handleKeyUp, han
           ])
         ]),
         h('tbody', null, 
-          bookings.map((booking => h(BookingsRow, { booking, handleClick, handleMouseOver, handleKeyUp, handleChange })))
+          listItems.map((listItem => h(ListItemRow, { listItem, handleClick, handleMouseOver, handleKeyUp, handleChange })))
         )
       ]
      )
@@ -114,7 +114,7 @@ class App extends Component {
     super(props);    
     
     this.state = {
-       bookingsX: this.props.bookings.map(b => ({ 
+       listItems: this.props.listItems.map(b => ({ 
          id:b.id, 
          owner:b.owner, 
          changeLog:b.changeLog, 
@@ -125,10 +125,10 @@ class App extends Component {
        }))
     };    
     
-    this.handleBookingClicked = this.handleBookingClicked.bind(this);
-    this.handleMouseOverBooking = this.handleMouseOverBooking.bind(this);
-    this.handleKeyUpBooking = this.handleKeyUpBooking.bind(this);
-    this.handleBookingChanged = this.handleBookingChanged.bind(this);
+    this.handleClickedListItem = this.handleClickedListItem.bind(this);
+    this.handleMouseOverListItem = this.handleMouseOverListItem.bind(this);
+    this.handleKeyUpListItem = this.handleKeyUpListItem.bind(this);
+    this.handleChangedListItem = this.handleChangedListItem.bind(this);
   }
   
   merge(obj1, obj2)
@@ -138,10 +138,10 @@ class App extends Component {
     }
   }
       
-  updateBookings(id, idFunc, nonIdFunc)
+  updateListItem(id, idFunc, nonIdFunc)
   {
-      this.setState(({bookingsX}) => {
-        bookingsX: bookingsX.map(b => {
+      this.setState(({listItems}) => {
+        listItems: listItems.map(b => {
           if (b.id == id) {
             var b1 = idFunc(b);
             return this.merge(b, b1);
@@ -153,34 +153,34 @@ class App extends Component {
       });
   }
   
-  handleBookingClicked(argBooking) {  
-    this.updateBookings(
-      argBooking.id,
+  handleClickedListItem(argListItem) {  
+    this.updateListItem(
+      argListItem.id,
       (b) => ({ editable: !b.editable }),
       (b) => ({ editable: false })
     );                 
   }
   
-  handleMouseOverBooking(argBooking) {
-    this.updateBookings(
-      argBooking.id,
+  handleMouseOverListItem(argListItem) {
+    this.updateListItem(
+      argListItem.id,
       (b) => ({ selected: true }),
       (b) => ({ selected: false })
     );                 
   }
   
-  handleKeyUpBooking(e,argBooking) {
+  handleKeyUpListItem(e,argListItem) {
     //console.log('keyup.... ' + Object.keys(val));
     if (e.keyCode == 13) {
-      this.updateBookings(
-        argBooking.id,
+      this.updateListItem(
+        argListItem.id,
         (b) => ({ owner: e.target.value, editable: false }),
         (b) => ({ })
       );                 
     }
   }
   
-  handleBookingChanged(e,argBooking) {
+  handleChangedListItem(e,argListItem) {
       console.log("handle change " + e.target.value)
       
       const addEntryToChangeLog = function(b) {
@@ -193,11 +193,11 @@ class App extends Component {
         }
       }
       
-      this.updateBookings(
-        argBooking.id,
+      this.updateListItem(
+        argListItem.id,
         (b) => ({ owner: e.target.value, changeLog: addEntryToChangeLog(b) })
       );    
-      storeBooking(argBooking);
+      storeListItem(argListItem);
   }
   
   componentDidUpdate() {
@@ -206,23 +206,23 @@ class App extends Component {
   
   render(props, state) {
     return <div class="app">
-              <BookingsTable 
-                bookings={state.bookingsX} 
-                handleClick={this.handleBookingClicked}
-                handleMouseOver={this.handleMouseOverBooking}
-                handleKeyUp={this.handleKeyUpBooking}
-                handleChange={this.handleBookingChanged} />
+              <ListItemsTable 
+                listItems={state.listItems} 
+                handleClick={this.handleClickedListItem}
+                handleMouseOver={this.handleMouseOverListItem}
+                handleKeyUp={this.handleKeyUpListItem}
+                handleChange={this.handleChangedListItem} />
            </div>
   }  
 }
 
 // Entry point for application
 (function start() {
-  Promise.all([fetchUserInfo(),fetchBookings()]).then(
-    ([userInfo,bookings]) => {
+  Promise.all([fetchUserInfo(),fetchListItems()]).then(
+    ([userInfo,listItems]) => {
        console.log("ui="+JSON.stringify(userInfo));      
-      console.log("bookings="+JSON.stringify(bookings));
-       return render(h(App, { bookings, userInfo }), document.getElementById('root'));
+      console.log("listItems="+JSON.stringify(listItems));
+       return render(h(App, { listItems, userInfo }), document.getElementById('root'));
     }
    )
    ;

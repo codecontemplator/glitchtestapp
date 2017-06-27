@@ -1,4 +1,4 @@
-{"owner":"daniel4","date":"2017-01-01","changeLog":[{"timestamp":"2017-06-27 20:19:07","owner":"daniel"},{"timestamp":"2017-06-27 20:21:41","owner":"daniel2"},{"timestamp":"2017-06-27 20:21:53","owner":"daniel3"}],"id":"1","listId":"2017"}
+{"owner":"daniel6","date":"2017-01-01","changeLog":[{"timestamp":"2017-06-27 20:19:07","owner":"daniel"},{"timestamp":"2017-06-27 20:21:41","owner":"daniel2"},{"timestamp":"2017-06-27 20:21:53","owner":"daniel3"},{"timestamp":"2017-06-27 20:29:17","owner":"daniel4"},{"timestamp":"2017-06-27 20:39:28","owner":"daniel5"}],"id":"1","listId":"2017"}
 {"id":"2","listId":"2017","owner":null,"date":"2017-02-01","changeLog":[]}
 {"id":"3","listId":"2017","owner":"sven","date":"2017-03-01","changeLog":[]}
 {"id":"4","listId":"2017","owner":"","date":"2017-04-01","changeLog":[]}
