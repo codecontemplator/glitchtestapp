@@ -1,13 +1,14 @@
-// server.js
-// where your node app starts
-
-// init project
 var express = require('express');
+var app = express();
 var bodyParser = require('body-parser')
 var fs = require('fs');
 var session = require('client-sessions');
 var nosql = require('nosql');
 var db = nosql.load('./database.nosql');
+
+//
+// Debug logging
+//
 
 db.find().make(function(filter) {
     filter.callback(function(err, response) {
@@ -15,15 +16,17 @@ db.find().make(function(filter) {
     });
 })
 
-var { File, transformFile } = require('babel-core');
-var app = express();
+//
+// Babel setup
+//
 
+var { File, transformFile } = require('babel-core');
 const babel_opts = JSON.parse(fs.readFileSync('package.json')).babel;
 
-//babel_opts.plugins = ['babel-plugin-transform-es2015-modules-systemjs'];
 
-// we've started you off with Express, 
-// but feel free to use whatever libs or frameworks you'd like through `package.json`.
+//
+// Security middleware
+//
 
 app.use(session({
   cookieName: 'session',
@@ -52,6 +55,10 @@ function requireLogin (req, res, next) {
   }
 };
 
+//
+// Static files etc
+// 
+
 app.get(/.*\.js$/, (req, res, next) => {
   const path = `public${req.path}`;
   
@@ -68,32 +75,23 @@ app.get(/.*\.js$/, (req, res, next) => {
   });
 });
 
-// http://expressjs.com/en/starter/static-files.html
 app.use(express.static('public'));
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json());
 
-// http://expressjs.com/en/starter/basic-routing.html
 app.get("/", requireLogin, function (request, response) {
   response.sendFile(__dirname + '/views/index.html');
 });
 
 
+//
+// The api
+// 
+
 app.get("/userinfo", function(request, response) {
   response.setHeader('Content-Type', 'application/json');
   response.send(JSON.stringify({ role: request.session.role }));
 });
-
-//var database = require("./database.json"); 
-function getDatabaseContent() {
-  const text = fs.readFileSync('./database.json','utf8');
-  return JSON.parse(text);
-}
-
-function setDatabaseContent(content)
-{
-  fs.writeFileSync('./database.json', JSON.stringify(content, null, 2));
-}
 
 app.get("/login", function (request, response) {
   response.sendFile(__dirname + '/views/login.html');
@@ -144,7 +142,9 @@ app.put("/list/:id/items/:itemId", function(request,response,next) {
   response.sendStatus(200);  // not sure if the update is completed here?
 });
 
+//
 // listen for requests :)
+//
 var listener = app.listen(process.env.PORT, function () {
   console.log('Your app is listening on port ' + listener.address().port);
 });
