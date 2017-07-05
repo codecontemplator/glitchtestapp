@@ -130,7 +130,6 @@ class App extends Component {
     this.handleMouseOverListItem = this.handleMouseOverListItem.bind(this);
     this.handleKeyUpListItem = this.handleKeyUpListItem.bind(this);
     this.handleChangedListItem = this.handleChangedListItem.bind(this);
-    this.tooltipInitialized = false;
   }
   
   merge(obj1, obj2)
@@ -200,24 +199,17 @@ class App extends Component {
         (b) => ({ owner: e.target.value, changeLog: addEntryToChangeLog(b) })
       );    
       storeListItem(argListItem);
-      this.updateToolTip();
   }
   
+  componentDidMount() {
+      $('[data-toggle="tooltip"]').tooltip({ html: true });         
+  }
+
   componentDidUpdate() {
-    this.updateToolTip();
-  }
-  
-  updateToolTip() {
-    if (this.tooltipInitialized) {
       // ref: https://stackoverflow.com/questions/9501921/change-twitter-bootstrap-tooltip-content-on-click
       $('[data-toggle="tooltip"]').tooltip('fixTitle');
-    }
-    else {
-      $('[data-toggle="tooltip"]').tooltip({ html: true });     
-      this.tooltipInitialized = true;
-    }
   }
-  
+    
   render(props, state) {
     return <div class="app">
               <ListItemsTable 
