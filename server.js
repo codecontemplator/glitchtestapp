@@ -76,8 +76,6 @@ app.get(/.*\.js$/, (req, res, next) => {
 });
 
 app.use(express.static('public'));
-app.use(bodyParser.urlencoded({ extended: true }))
-app.use(bodyParser.json());
 
 app.get("/", requireLogin, function (request, response) {
   response.sendFile(__dirname + '/views/index.html');
@@ -87,6 +85,9 @@ app.get("/", requireLogin, function (request, response) {
 //
 // The api
 // 
+
+app.use(bodyParser.urlencoded({ extended: true }))
+app.use(bodyParser.json());
 
 app.get("/userinfo", function(request, response) {
   response.setHeader('Content-Type', 'application/json');
