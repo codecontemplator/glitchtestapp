@@ -1,5 +1,9 @@
 var express = require('express');
 var app = express();
+
+// ref: https://github.com/socketio/socket.io/blob/master/examples/cluster-nginx/server/index.js
+var server = require('http').createServer(app);
+var io = require('socket.io')(server);
 var bodyParser = require('body-parser')
 var fs = require('fs');
 var session = require('client-sessions');
@@ -23,12 +27,11 @@ db.find().make(function(filter) {
 var { File, transformFile } = require('babel-core');
 const babel_opts = JSON.parse(fs.readFileSync('package.json')).babel;
 
-
 //
 // Security middleware
 //
 
-app.use(session({
+const clientSessionSettings = {
   cookieName: 'session',
   secret: process.env.SESSION_SECRET,
   duration: 30 * 60 * 1000,
@@ -36,7 +39,9 @@ app.use(session({
   httpOnly: true,
   secure: true,
   ephemeral: true  
-}));
+};
+
+app.use(session(clientSessionSettings));
 
 app.use(function(req, res, next) {
   if (req.session && req.session.role) {
@@ -141,11 +146,55 @@ app.put("/list/:id/items/:itemId", function(request,response,next) {
   itemData.listId = listId;
   db.update(itemData).where('id', itemId);
   response.sendStatus(200);  // not sure if the update is completed here?
+  //socket.broadcast.emit('item-updated', itemData);
+});
+
+
+//
+// Start server process
+//
+server.listen(process.env.PORT, function () {
+  console.log('Your app is listening on port ' + server.address().port);
 });
 
 //
-// listen for requests :)
+// Pubsub
 //
-var listener = app.listen(process.env.PORT, function () {
-  console.log('Your app is listening on port ' + listener.address().port);
+
+// ref: https://stackoverflow.com/questions/18475543/how-access-session-data-of-node-client-sessions-on-socket-io
+var cookie = require('cookie');
+var encode = require('client-sessions').util.encode;
+var decode = require('client-sessions').util.decode;
+
+function authorizeSocket(handshakeData, callback) {  
+  if (!handshakeData.headers.cookie) {
+            callback({
+                status: 'forbidden',
+                reason: 'no session',
+                source: 'socket_io'
+            }, false);
+            return;
+  }
+
+  var session = decode(clientSessionSettings, cookie.parse(handshakeData.headers.cookie).session).content;
+  
+  if (session.role) {
+      handshakeData.session = session;
+      callback(null, true);
+  } else {
+      callback(null, false);
+  }  
+}
+
+io.set('authorization', authorizeSocket);
+
+// Listen for incoming connections from clients
+io.sockets.on('connection', function (socket) {
+	// Start listening for mouse move events
+	socket.on('item-updated', function (data) {
+    console.log('item-updated recieved' + JSON.stringify(data));
+		// This line sends the event (broadcasts it)
+		// to everyone except the originating client.
+		socket.broadcast.emit('item-updated', data);
+	});
 });

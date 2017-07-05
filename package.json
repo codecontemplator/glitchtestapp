@@ -15,6 +15,7 @@
     "body-parser": "latest",
     "client-sessions": "latest",
     "nosql": "latest",
+    "socket.io": "*",
 		"babel-core": "*",
 		"babel-cli": "*",
 		"babel-preset-es2015": "*",

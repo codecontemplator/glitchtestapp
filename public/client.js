@@ -40,7 +40,6 @@ function storeListItem(item, listId = "2017") {
 }
 
 const ListItemHistory = ({changeLog}) => {
-    console.log("ListItemHistory: " + JSON.stringify(changeLog));
     var result = null;
     if (changeLog && changeLog.length > 0) {
       result = h('span', {
@@ -75,7 +74,7 @@ class ListItemRow extends Component {
             h('td', { width:'120px'}, listItem.date),
             h('td', { width:'300px'}, 
               h('div', {}, [
-                !listItem.editable ? state.owner : 
+                !listItem.editable ? listItem.owner : 
                   h('input', { 
                     style: { width:'100%', padding:'2px' },
                     type:'text', 
@@ -130,6 +129,10 @@ class App extends Component {
     this.handleMouseOverListItem = this.handleMouseOverListItem.bind(this);
     this.handleKeyUpListItem = this.handleKeyUpListItem.bind(this);
     this.handleChangedListItem = this.handleChangedListItem.bind(this);
+    
+    this.socket = io();
+    const self = this;
+    this.socket.on('item-updated', argListItem => self.updateClientListItem(argListItem.id, argListItem.owner, argListItem.changeLog));    
   }
   
   merge(obj1, obj2)
@@ -151,7 +154,7 @@ class App extends Component {
             return this.merge(b, b1);
           }
         })
-      });
+      });    
   }
   
   handleClickedListItem(argListItem) {  
@@ -182,8 +185,12 @@ class App extends Component {
   }
   
   handleChangedListItem(e,argListItem) {
-      console.log("handle change " + e.target.value)
-      
+      this.updateClientListItem(argListItem.id, e.target.value);
+      storeListItem(argListItem);
+      this.socket.emit('item-updated', this.state.listItems.find((x) => x.id == argListItem.id));        
+  }
+
+  updateClientListItem(itemId, newOwner, changeLog) {
       const addEntryToChangeLog = function(b) {
         const entry = {timestamp:new Date().toLocaleString(), owner:b.owner};
         if (b.changeLog) {
@@ -195,10 +202,9 @@ class App extends Component {
       }
       
       this.updateListItem(
-        argListItem.id,
-        (b) => ({ owner: e.target.value, changeLog: addEntryToChangeLog(b) })
-      );    
-      storeListItem(argListItem);
+        itemId,
+        (b) => ({ owner: newOwner, changeLog: changeLog ? changeLog : addEntryToChangeLog(b)})
+      );     
   }
   
   componentDidMount() {
@@ -221,7 +227,7 @@ class App extends Component {
            </div>
   }  
 }
-
+    
 // Entry point for application
 (function start() {
   Promise.all([fetchUserInfo(),fetchListItems()]).then(
