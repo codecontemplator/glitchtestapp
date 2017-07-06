@@ -80,7 +80,12 @@ class ListItemRow extends Component {
   render({listItem, handleClick, handleMouseOver, handleKeyUp, handleChange}, state) {
       return <tr onMouseOver={() => handleMouseOver(listItem)}>
                 <td width='30px'>
-                  {listItem.selected &&
+                  {listItem.locked &&
+                    <span className="glyphicon glyphicon-lock" />
+                  }
+                </td>              
+                <td width='30px'>
+                  {listItem.selected && !listItem.locked &&
                     <a href='#' onClick={() => handleClick(listItem)}>
                       <span className="glyphicon glyphicon-edit" />
                     </a>                  
@@ -118,6 +123,7 @@ const ListItemsTable = ({listItems, handleClick, handleMouseOver, handleKeyUp, h
         h('thead', null, [
           h('tr', null, [
             h('th', null, " "),
+            h('th', null, " "),
             h('th', null, "date"),
             h('th', null, "name"),
             h('th', null, "history")
@@ -153,8 +159,14 @@ class App extends Component {
     this.socket = io();
     const self = this;
     this.socket.on('item-updated', argListItem => self.updateClientListItem(argListItem.id, argListItem.owner, argListItem.changeLog));    
+    this.socket.on('begin-item-edit', argListItemId => {
+      self.updateListItem(argListItemId, (b) => ({ locked: true }));
+    });    
+    this.socket.on('end-item-edit', argListItemId => {
+      self.updateListItem(argListItemId, (b) => ({ locked: false }));
+    });    
   }
-  
+
   merge(obj1, obj2)
   {
     for (var attrname in obj2) { 
@@ -182,7 +194,14 @@ class App extends Component {
       argListItem.id,
       (b) => ({ editable: !b.editable }),
       (b) => ({ editable: false })
-    );                 
+    );   
+    
+    const item = this.state.listItems.find((x) => x.id == argListItem.id)
+    if (item.editable) {
+      this.socket.emit('begin-item-edit', item.id);  
+    } else {
+      this.socket.emit('end-item-edit', item.id);  
+    }
   }
   
   handleMouseOverListItem(argListItem) {
@@ -207,6 +226,7 @@ class App extends Component {
   handleChangedListItem(e,argListItem) {
       this.updateClientListItem(argListItem.id, e.target.value);
       storeListItem(argListItem);
+      this.socket.emit('end-item-edit', argListItem.id);  
   }
 
   updateClientListItem(itemId, newOwner, changeLog) {

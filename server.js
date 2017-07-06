@@ -222,12 +222,15 @@ io.use(function(socket, next) {
 
 // Listen for incoming connections from clients
 io.sockets.on('connection', function (socket) {
-  /*
-	socket.on('item-updated', function (data) {
-    console.log('item-updated recieved' + JSON.stringify(data));
-		// This line sends the event (broadcasts it)
-		// to everyone except the originating client.
-		socket.broadcast.emit('item-updated', data);
-	});
-  */
+  
+  socket.on('begin-item-edit', function (data) {
+    console.log("begin-item-edit");
+		socket.broadcast.emit('begin-item-edit', data);    
+  });
+  
+  socket.on('end-item-edit', function (data) {
+    console.log("end-item-edit");
+		socket.broadcast.emit('end-item-edit', data);        
+  });
+  
 });
