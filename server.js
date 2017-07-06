@@ -1,3 +1,7 @@
+//
+// Load dependencies
+//
+
 var express = require('express');
 var app = express();
 
@@ -8,11 +12,14 @@ var bodyParser = require('body-parser')
 var fs = require('fs');
 var session = require('client-sessions');
 var nosql = require('nosql');
-var db = nosql.load('./database.nosql');
+var uuid = require('uuid');
+
 
 //
-// Debug logging
+// Initialize database
 //
+
+var db = nosql.load('./database.nosql');
 
 db.find().make(function(filter) {
     filter.callback(function(err, response) {
@@ -91,6 +98,12 @@ app.get("/", requireLogin, function (request, response) {
 // The api
 // 
 
+var sessions = {};
+
+function fireEvent(sessionId, eventName, eventData) {
+  sessions[sessionId].socket.broadcast.emit(eventName, eventData);
+}
+
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json());
 
@@ -106,7 +119,9 @@ app.get("/login", function (request, response) {
 app.post('/login', function(req, res) {
   if (req.body.secret) {
     if (req.body.secret == process.env.USER_SECRET) {
-        req.session.role = "user";
+        const sessionId = uuid.v4(); 
+        req.session.role = "user";      
+        req.session.id = sessionId;
         res.redirect('/');      
     }
     else {
@@ -144,9 +159,20 @@ app.put("/list/:id/items/:itemId", function(request,response,next) {
   var itemData = request.body;
   itemData.id = itemId;
   itemData.listId = listId;
-  db.update(itemData).where('id', itemId);
-  response.sendStatus(200);  // not sure if the update is completed here?
-  //socket.broadcast.emit('item-updated', itemData);
+  const databaseQuery = new Promise((resolve, reject) => {
+    db.update(itemData).where('id', itemId).callback(function(err, result) {
+        if (err) {
+          reject(err);
+        } else {
+          resolve();
+        }      
+    });
+  });
+  
+  databaseQuery.then(() => {
+    response.sendStatus(200);
+    fireEvent(request.session.id, 'item-updated', itemData);
+  });    
 });
 
 
@@ -166,35 +192,35 @@ var cookie = require('cookie');
 var encode = require('client-sessions').util.encode;
 var decode = require('client-sessions').util.decode;
 
-function authorizeSocket(handshakeData, callback) {  
+// Authorization middleware. Check that the request contains a valid session token
+io.use(function(socket, next) {
+  var handshakeData = socket.request;
+  
   if (!handshakeData.headers.cookie) {
-            callback({
-                status: 'forbidden',
-                reason: 'no session',
-                source: 'socket_io'
-            }, false);
-            return;
+    next(new Error('not authorized'));
   }
 
   var session = decode(clientSessionSettings, cookie.parse(handshakeData.headers.cookie).session).content;
   
-  if (session.role) {
-      handshakeData.session = session;
-      callback(null, true);
-  } else {
-      callback(null, false);
-  }  
-}
+  if (!session.role) {
+      next(new Error('not authorized'));
+  }
 
-io.set('authorization', authorizeSocket);
+  // add the socket to the session object and store it globally for access by the rest api
+  session.socket = socket;
+  sessions[session.id] = session;
+  
+  next();
+});
 
 // Listen for incoming connections from clients
 io.sockets.on('connection', function (socket) {
-	// Start listening for mouse move events
+  /*
 	socket.on('item-updated', function (data) {
     console.log('item-updated recieved' + JSON.stringify(data));
 		// This line sends the event (broadcasts it)
 		// to everyone except the originating client.
 		socket.broadcast.emit('item-updated', data);
 	});
+  */
 });

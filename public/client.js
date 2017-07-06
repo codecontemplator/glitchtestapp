@@ -239,4 +239,3 @@ class App extends Component {
    )
    ;
 }());
-
