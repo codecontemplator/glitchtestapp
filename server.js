@@ -101,7 +101,10 @@ app.get("/", requireLogin, function (request, response) {
 var sessions = {};
 
 function fireEvent(sessionId, eventName, eventData) {
-  sessions[sessionId].socket.broadcast.emit(eventName, eventData);
+  var session = sessions[sessionId];
+  if (session) {
+    session.socket.broadcast.emit(eventName, eventData);  
+  }  
 }
 
 app.use(bodyParser.urlencoded({ extended: true }))

@@ -61,8 +61,17 @@ class ListItemRow extends Component {
     };     
     
     this.onKeyUpOwnerTextBox = this.onKeyUpOwnerTextBox.bind(this);    
+    this.editable = this.props.listItem.editable;
   }
   
+  componentWillReceiveProps(nextProps, nextState) {
+      if (!this.editable && nextProps.listItem.editable) {
+        this.setState({owner: this.props.listItem.owner });
+      }
+    
+      this.editable = nextProps.listItem.editable;
+  }
+
   onKeyUpOwnerTextBox(e, listItem) {
     this.setState({ owner: e.target.value }); 
     this.props.handleKeyUp(e, listItem);
@@ -86,7 +95,7 @@ class ListItemRow extends Component {
                       <input 
                           style="width:'100%; padding:'2px'" 
                           type='text' 
-                          value={state.owner} 
+                          value={this.state.owner} 
                           onKeyUp={(e) => this.onKeyUpOwnerTextBox(e, listItem)} 
                           onChange={(e) => handleChange(e, listItem)} />
                      ) : (
