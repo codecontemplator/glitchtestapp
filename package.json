@@ -16,6 +16,7 @@
     "client-sessions": "latest",
     "nosql": "latest",
     "socket.io": "*",
+    "uuid": "*",
 		"babel-core": "*",
 		"babel-cli": "*",
 		"babel-preset-es2015": "*",
