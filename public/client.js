@@ -59,35 +59,46 @@ class ListItemRow extends Component {
     this.state = {
        owner: this.props.listItem.owner         
     };     
+    
+    this.onKeyUpOwnerTextBox = this.onKeyUpOwnerTextBox.bind(this);    
+  }
+  
+  onKeyUpOwnerTextBox(e, listItem) {
+    this.setState({ owner: e.target.value }); 
+    this.props.handleKeyUp(e, listItem);
   }
   
   render({listItem, handleClick, handleMouseOver, handleKeyUp, handleChange}, state) {
-    return h('tr', {onMouseOver: () => handleMouseOver(listItem)}, [
-            h('td', { width:'30px'}, [
-              listItem.selected ? 
-                h('a', {
-                  href:'#',
-                  onClick: () => handleClick(listItem)
-                }, [h('span', { className:'glyphicon glyphicon-edit' }, null)])                
-                : null
-              ]),
-            h('td', { width:'120px'}, listItem.date),
-            h('td', { width:'300px'}, 
-              h('div', {}, [
-                !listItem.editable ? listItem.owner : 
-                  h('input', { 
-                    style: { width:'100%', padding:'2px' },
-                    type:'text', 
-                    value:state.owner,
-                    onkeyup: (e) => { this.setState({ owner: e.target.value}); handleKeyUp(e, listItem) },
-                    onchange: (e) => handleChange(e, listItem),
-                  }, []),
-                
-              ])
-            ),
-            h('td', {width:'200px'}, [h(ListItemHistory, { changeLog:listItem.changeLog })])
-          ]    
-        );    
+      return <tr onMouseOver={() => handleMouseOver(listItem)}>
+                <td width='30px'>
+                  {listItem.selected &&
+                    <a href='#' onClick={() => handleClick(listItem)}>
+                      <span className="glyphicon glyphicon-edit" />
+                    </a>                  
+                  }
+                </td>
+                <td width='120px'>
+                  {listItem.date}
+                </td>
+                <td width='300px'>
+                  <div>
+                    { listItem.editable ? (
+                      <input 
+                          style="width:'100%; padding:'2px'" 
+                          type='text' 
+                          value={state.owner} 
+                          onKeyUp={(e) => this.onKeyUpOwnerTextBox(e, listItem)} 
+                          onChange={(e) => handleChange(e, listItem)} />
+                     ) : (
+                      <span>{listItem.owner}</span>                    
+                     )
+                    }
+                  </div>
+                </td>
+                <td width='200px'>
+                  <ListItemHistory changeLog={listItem.changeLog} />
+                </td>
+             </tr>
   }
 }
 
