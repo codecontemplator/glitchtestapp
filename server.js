@@ -209,6 +209,10 @@ io.use(function(socket, next) {
   // add the socket to the session object and store it globally for access by the rest api
   session.socket = socket;
   sessions[session.id] = session;
+
+  socket.on('disconnect', function() {
+      delete sessions[session.id];
+  });  
   
   next();
 });
