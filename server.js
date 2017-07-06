@@ -153,7 +153,7 @@ app.get("/list/:id/items", requireLogin, function (request, response) {
   databaseQuery.then(data => response.send(data));
 });
 
-app.put("/list/:id/items/:itemId", function(request,response,next) {
+app.put("/list/:id/items/:itemId", requireLogin, function(request,response,next) {
   const listId = request.params.id;
   const itemId = request.params.itemId;
   var itemData = request.body;
