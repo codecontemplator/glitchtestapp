@@ -207,7 +207,6 @@ class App extends Component {
   handleChangedListItem(e,argListItem) {
       this.updateClientListItem(argListItem.id, e.target.value);
       storeListItem(argListItem);
-      this.socket.emit('item-updated', this.state.listItems.find((x) => x.id == argListItem.id));        
   }
 
   updateClientListItem(itemId, newOwner, changeLog) {
@@ -237,7 +236,7 @@ class App extends Component {
   }
     
   render(props, state) {
-    return <div class="app">
+    return <div className="app">
               <ListItemsTable 
                 listItems={state.listItems} 
                 handleClick={this.handleClickedListItem}
