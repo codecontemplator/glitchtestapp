@@ -39,6 +39,34 @@ function storeListItem(item, listId = "2017") {
   });
 }
 
+function beginEditListItem(itemId, listId = "2017") {
+  $.ajax({
+    url: "/list/" + listId + "/items/" + itemId + "/_beginedit",
+    type: "POST",
+    contentType: 'application/json',
+    success: function() {
+      console.log("Locked!")
+    },
+    error: function(e) {
+      console.log("Error " + JSON.stringify(e))
+    }  
+  });  
+}
+
+function endEditListItem(itemId, listId = "2017") {
+  $.ajax({
+    url: "/list/" + listId + "/items/" + itemId + "/_endedit",
+    type: "POST",
+    contentType: 'application/json',
+    success: function() {
+      console.log("Unlocked!")
+    },
+    error: function(e) {
+      console.log("Error " + JSON.stringify(e))
+    }  
+  });  
+}
+
 const ListItemHistory = ({changeLog}) => {
     var result = null;
     if (changeLog && changeLog.length > 0) {
@@ -66,7 +94,12 @@ class ListItemRow extends Component {
   
   componentWillReceiveProps(nextProps, nextState) {
       if (!this.editable && nextProps.listItem.editable) {
+        beginEditListItem(this.props.listItem.id);        
         this.setState({owner: this.props.listItem.owner });
+      }
+    
+      if (this.editable && !nextProps.listItem.editable) {
+        endEditListItem(this.props.listItem.id);                
       }
     
       this.editable = nextProps.listItem.editable;
@@ -159,11 +192,12 @@ class App extends Component {
     this.socket = io();
     const self = this;
     this.socket.on('item-updated', argListItem => self.updateClientListItem(argListItem.id, argListItem.owner, argListItem.changeLog));    
-    this.socket.on('begin-item-edit', argListItemId => {
-      self.updateListItem(argListItemId, (b) => ({ locked: true }));
+    this.socket.on('begin-item-edit', data => {
+      console.log("begin-item-edit " + JSON.stringify(data));
+      self.updateListItem(data.itemId, (b) => ({ locked: true }));
     });    
-    this.socket.on('end-item-edit', argListItemId => {
-      self.updateListItem(argListItemId, (b) => ({ locked: false }));
+    this.socket.on('end-item-edit', data => {
+      self.updateListItem(data.itemId, (b) => ({ locked: false }));
     });    
   }
 
@@ -194,14 +228,7 @@ class App extends Component {
       argListItem.id,
       (b) => ({ editable: !b.editable }),
       (b) => ({ editable: false })
-    );   
-    
-    const item = this.state.listItems.find((x) => x.id == argListItem.id)
-    if (item.editable) {
-      this.socket.emit('begin-item-edit', item.id);  
-    } else {
-      this.socket.emit('end-item-edit', item.id);  
-    }
+    );       
   }
   
   handleMouseOverListItem(argListItem) {
@@ -219,14 +246,13 @@ class App extends Component {
         argListItem.id,
         (b) => ({ owner: e.target.value, editable: false }),
         (b) => ({ })
-      );                 
-    }
+      );                       
+    }    
   }
   
   handleChangedListItem(e,argListItem) {
       this.updateClientListItem(argListItem.id, e.target.value);
       storeListItem(argListItem);
-      this.socket.emit('end-item-edit', argListItem.id);  
   }
 
   updateClientListItem(itemId, newOwner, changeLog) {

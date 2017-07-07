@@ -27,6 +27,8 @@ db.find().make(function(filter) {
     });
 })
 
+var locks = {}; 
+
 //
 // Babel setup
 //
@@ -156,6 +158,62 @@ app.get("/list/:id/items", requireLogin, function (request, response) {
   databaseQuery.then(data => response.send(data));
 });
 
+app.post("/list/:id/items/:itemId/_beginedit", requireLogin, function(request,response,next) {
+  
+  const listId = request.params.id;
+  const itemId = request.params.itemId;
+  
+  if (!locks[listId]) {
+    console.log("locks for list id " + listId + " created");
+    locks[listId] = {};
+  }
+  
+  if (!(itemId in locks[listId])) {
+    console.log("locks for item id " + itemId + " created");
+    locks[listId][itemId] = null;
+  }
+  
+  if (locks[listId][itemId] != null && locks[listId][itemId] != request.session.id) {
+    console.log("already locked " + locks[listId][itemId]);
+    response.sendStatus(400);
+    return;
+  }  
+  
+  locks[listId][itemId] = request.session.id;
+  response.sendStatus(200);
+  fireEvent(request.session.id, 'begin-item-edit', { listId: listId, itemId: itemId });
+
+});
+
+app.post("/list/:id/items/:itemId/_endedit", requireLogin, function(request,response,next) {
+
+  const listId = request.params.id;
+  const itemId = request.params.itemId;
+  
+  if (!locks[listId]) {
+    console.log("cannot find list to unlock");
+    response.sendStatus(400);
+    return;
+  }
+  
+  if (!(itemId in locks[listId])) {
+    console.log("cannot find item to unlock");
+    response.sendStatus(400);
+    return;
+  }
+  
+  if (locks[listId][itemId] != null && locks[listId][itemId] != request.session.id) {
+    console.log("not locked or locked by someone else");
+    response.sendStatus(400);
+    return;
+  }  
+  
+  locks[listId][itemId] = null;
+  response.sendStatus(200);
+  fireEvent(request.session.id, 'end-item-edit', { listId: listId, itemId: itemId });
+
+});
+
 app.put("/list/:id/items/:itemId", requireLogin, function(request,response,next) {
   const listId = request.params.id;
   const itemId = request.params.itemId;
@@ -223,6 +281,7 @@ io.use(function(socket, next) {
 // Listen for incoming connections from clients
 io.sockets.on('connection', function (socket) {
   
+  /*
   socket.on('begin-item-edit', function (data) {
     console.log("begin-item-edit");
 		socket.broadcast.emit('begin-item-edit', data);    
@@ -232,5 +291,6 @@ io.sockets.on('connection', function (socket) {
     console.log("end-item-edit");
 		socket.broadcast.emit('end-item-edit', data);        
   });
+  */
   
 });
