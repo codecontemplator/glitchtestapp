@@ -1,15 +1,22 @@
-Welcome to the Glitch BETA
+A glitch test application
 =========================
 
-Click `Show` in the header to see your app live. Updates to your code will instantly deploy and update live.
+Test of some web technologies along with the glitch dev+hosting environment.
 
-**Glitch** is the friendly commmunity where you'll build the app of your dreams. Glitch lets you instantly create, remix, edit, and host an app, bot or site, and you can invite collaborators or helpers to simultaneously edit code with you.
+* [express js](https://expressjs.com/) - for http server and rest api implementation
+* [socket.io](https://socket.io/) - for server side events
+* [nosql](https://www.npmjs.com/package/nosql) - for a light weight json database
+* [client-sessions](https://github.com/mozilla/node-client-sessions) - for security
+* [(p)react](https://github.com/developit/preact) - for user interface
+* [babel](https://babeljs.io/) - to enable client side jsx
 
-Find out more [about Glitch](https://glitch.com/about).
+and the almost mandatory technlogies ofcourse
 
+* [boostrap](http://getbootstrap.com/) - for styling
+* [jQuery](https://jquery.com/) - for... things... (currently mostly for rest api calls to the server)
 
-Your Project
-------------
+Glitch general note
+-------------------
 
 On the front-end,
 - edit `public/client.js`, `public/style.css` and `views/index.html`
@@ -21,7 +28,3 @@ On the back-end,
 - safely store app secrets in `.env` (nobody can see this but you and people you invite)
 
 
-Made by [Fog Creek](https://fogcreek.com/)
--------------------
-
-\ ゜o゜)ノ
